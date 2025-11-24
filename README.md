@@ -47,5 +47,13 @@ To build and run the project, follow these steps:
 - [ ] Add more complex collision scenarios and object types.
 - [ ] Add collision detection between multiple objects
 
+21/10/2025
+
+- Create the project structure and initialize SFML window.
+- Fixing SFML incompatibility issues for Apple M2 ARM64 architecture.
+
 24/11/2025
-The object can collide with the wall but not with other objects yet.
+
+- The object can collide with the wall but not with other objects yet.
+- Implement basic collision detection and response between objects.
+- Update the run script to build SFML dynamically if not already built.
