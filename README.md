@@ -57,3 +57,5 @@ To build and run the project, follow these steps:
 - The object can collide with the wall but not with other objects yet.
 - Implement basic collision detection and response between objects.
 - Update the run script to build SFML dynamically if not already built.
+
+https://github.com/user-attachments/assets/8f7667fd-8a75-468a-a9fd-2092a1890694
