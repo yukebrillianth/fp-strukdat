@@ -1,8 +1,7 @@
 /**
- * Simulasi Partikel Sederhana menggunakan SFML 3.x.x
- * FP Struktur Data dan Algoritma
- * Dibuat oleh: @yukebrillianth
- * NRP: 5024241016
+ * @author Yuke Brilliant H (yukebrilliant@gmail.com)
+ * @details Partikel Sederhana menggunakan SFML 3.x.x
+ * @memberof FP Struktur Data dan Algoritma
  */
 
 #include <SFML/Graphics.hpp>
