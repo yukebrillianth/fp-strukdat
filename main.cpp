@@ -11,9 +11,10 @@
 #include <ctime>
 #include <optional>
 
-// window dimensions
+// --- config ---
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
+const unsigned int PARTICLE_COUNT = 30;
 
 // Particle structy
 struct Particle
@@ -43,6 +44,7 @@ void resolveCollision(Particle &p1, Particle &p2)
     sf::Vector2f pos2 = p2.shape.getPosition();
     sf::Vector2f delta = pos1 - pos2;
 
+    // d miring = akar(x² + y²)
     float distance = std::sqrt(delta.x * delta.x + delta.y * delta.y);
     float combinedRadius = p1.shape.getRadius() + p2.shape.getRadius();
 
@@ -55,8 +57,27 @@ void resolveCollision(Particle &p1, Particle &p2)
         p2.shape.move(-correction);
 
         // calculate new velocities after collision
-        sf::Vector2f normal = delta / distance;
-        sf::Vector2f tangent(-normal.y, normal.x);
+        sf::Vector2f normal = delta / distance;    // garis antara titik pusat partikel
+        sf::Vector2f tangent(-normal.y, normal.x); // garis tegak lurus normal
+
+        // proyeksi ke garis normal dan tangent
+        float v1tan = p1.velocity.x * tangent.x + p1.velocity.y * tangent.y;
+        float v2tan = p2.velocity.x * tangent.x + p2.velocity.y * tangent.y;
+
+        float v1n = p1.velocity.x * normal.x + p1.velocity.y * normal.y;
+        float v2n = p2.velocity.x * normal.x + p2.velocity.y * normal.y;
+
+        float m1 = p1.mass;
+        float m2 = p2.mass;
+
+        float momentum1 = (v1n * (m1 - m2) + 2.0f * m2 * v2n) / (m1 + m2);
+        float momentum2 = (v2n * (m2 - m1) + 2.0f * m1 * v1n) / (m1 + m2);
+
+        p1.velocity.x = tangent.x * v1tan + normal.x * momentum1;
+        p1.velocity.y = tangent.y * v1tan + normal.y * momentum1;
+
+        p2.velocity.x = tangent.x * v2tan + normal.x * momentum2;
+        p2.velocity.y = tangent.y * v2tan + normal.y * momentum2;
     }
 }
 
@@ -79,13 +100,15 @@ int main()
 
     std::vector<Particle> particles;
 
-    for (int i = 0; i < 15; ++i)
+    for (int i = 0; i < PARTICLE_COUNT; ++i)
     {
+        // randomize radiys 20-50px
         float r = 20.0f + static_cast<float>(rand() % 30);
         float x = r + static_cast<float>(rand() % (WINDOW_WIDTH - static_cast<int>(2 * r)));
         float y = r + static_cast<float>(rand() % (WINDOW_HEIGHT - static_cast<int>(2 * r)));
-        float vx = -4.0f + static_cast<float>(rand() % 9);
-        float vy = -4.0f + static_cast<float>(rand() % 9);
+        // randomize velocity -3 to 3 ajah excluding 0
+        float vx = -3.0f + static_cast<float>(rand() % 7);
+        float vy = -3.0f + static_cast<float>(rand() % 7);
 
         if (vx == 0)
             vx = 1;
@@ -137,10 +160,10 @@ int main()
             }
 
             // cek tabrkan antar partikel
-            // for (size_t j = i + 1; j < particles.size(); ++j)
-            // {
-            //     resolveCollision(particles[i], particles[j]);
-            // }
+            for (size_t j = i + 1; j < particles.size(); ++j)
+            {
+                resolveCollision(particles[i], particles[j]);
+            }
         }
 
         window.clear(sf::Color::Black);

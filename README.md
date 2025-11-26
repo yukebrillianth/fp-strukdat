@@ -44,8 +44,8 @@ To build and run the project, follow these steps:
 
 - [x] Setup SFML as a submodule and build it automatically.
 - [x] Implement basic collision detection and response.
-- [ ] Add more complex collision scenarios and object types.
-- [ ] Add collision detection between multiple objects
+- [x] Add collision detection between multiple objects
+- [ ] Use bruteforce method and optimize it using spatial partitioning techniques like QuadTree.
 
 21/10/2025
 
@@ -59,3 +59,8 @@ To build and run the project, follow these steps:
 - Update the run script to build SFML dynamically if not already built.
 
 https://github.com/user-attachments/assets/8f7667fd-8a75-468a-a9fd-2092a1890694
+
+26/11/2025
+
+- Implement collision detection between multiple objects.
+- TO DO: Use bruteforce method and optimize it using spatial partitioning techniques like QuadTree.
