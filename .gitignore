@@ -5,3 +5,4 @@ run
 .DS_Store
 sfml/build/
 sfml/install/
+.cache

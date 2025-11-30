@@ -6,8 +6,13 @@
  */
 
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include <cstdlib>
 #include <ctime>
+#include <optional>
+#include <memory>
+#include <string>
+#include <iostream>
 
 #include "core/Config.h"
 #include "core/Particle.h"
@@ -80,30 +85,60 @@ std::vector<Particle> initializeParticles()
     return particles;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+    // Parse command-line arguments buat pilih algo
+    std::string algoName = "brute"; // default
+    if (argc > 1)
+    {
+        std::string arg = argv[1];
+        if (arg == "--algo" && argc > 2)
+        {
+            algoName = argv[2];
+        }
+
+        if (arg == "--help")
+        {
+            std::cout << "Usage: ./run [options]\n";
+            std::cout << "Options:\n";
+            std::cout << "  --algo [brute|quadtree]  Select collision detection algorithm\n";
+            std::cout << "  --help                  Show this help message\n";
+            return 0;
+        }
+    }
 
     // Initialize SFML window with anti-aliasing
     sf::ContextSettings settings;
     settings.antiAliasingLevel = 8;
 
+    // Window title tergantung algo yang dipilih
+    std::string windowTitle = "Particle Collision - Algorithm: " + algoName;
+
     sf::RenderWindow window(
         sf::VideoMode({Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT}),
-        "Particle Collision Simulation",
+        windowTitle,
         sf::Style::Default,
         sf::State::Windowed,
-        settings
-    );
+        settings);
 
     window.setFramerateLimit(Config::TARGET_FPS);
 
     // Initialize particles
     std::vector<Particle> particles = initializeParticles();
 
-    // Select collision detection algorithm
-    // TODO: Add runtime algorithm selection (e.g., keyboard input)
-    std::unique_ptr<CollisionDetector> detector = std::make_unique<BruteForce>();
+    // Select collision detection algorithm berdasarkan argument
+    std::unique_ptr<CollisionDetector> detector;
+    if (algoName == "quadtree")
+    {
+        detector = std::make_unique<QuadTree>();
+    }
+    else
+    {
+        // Default ke brute force
+        detector = std::make_unique<BruteForce>();
+    }
 
     // Main game loop
     while (window.isOpen())

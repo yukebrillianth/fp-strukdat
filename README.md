@@ -57,12 +57,27 @@ fp/
 - **Description**: Checks every pair of particles for collisions using nested loops
 - **Best For**: Small number of particles (< 100)
 
-### QuadTree (Planned)
+### QuadTree (Implemented)
 
 - **Time Complexity**: O(n log n) average case
 - **Space Complexity**: O(n)
-- **Description**: Uses spatial partitioning to reduce collision checks
+- **Description**: Uses spatial partitioning to reduce collision checks. Rebuilds tree each frame.
 - **Best For**: Large number of particles (> 100)
+
+## Algorithm Selection
+
+You can choose which algorithm to use with command-line arguments:
+
+```bash
+# Run with brute-force (default)
+./run
+./run --algo brute
+
+# Run with QuadTree
+./run --algo quadtree
+```
+
+The algorithm name will be displayed in the window title.
 
 ## Dependencies
 
@@ -113,8 +128,8 @@ cd ..
 - [x] Add collision detection between multiple objects
 - [x] Restructure project with proper folder organization
 - [x] Implement brute-force collision detection algorithm
-- [ ] Implement QuadTree spatial partitioning algorithm
-- [ ] Add runtime algorithm selection (keyboard input)
+- [x] Implement QuadTree spatial partitioning algorithm
+- [x] Add command-line argument support for algorithm selection
 - [ ] Add performance metrics display (FPS, collision checks per frame)
 
 21/10/2025
@@ -141,4 +156,6 @@ https://github.com/user-attachments/assets/8f7667fd-8a75-468a-a9fd-2092a1890694
 - Separate core components and collision detection algorithms.
 - Implement CollisionDetector interface for algorithm abstraction.
 - Extract Particle class and configuration into separate files.
-- Prepare structure for QuadTree implementation.
+- Add CMake build system for cross-platform compatibility.
+- Implement QuadTree spatial partitioning for O(n log n) collision detection.
+- Add command-line argument support: `./run --algo [brute|quadtree]`
