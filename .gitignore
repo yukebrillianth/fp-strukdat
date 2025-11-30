@@ -1,3 +1,7 @@
-sfml-3.0.2/
+build/
 run
+*.o
+*.dylib
 .DS_Store
+sfml/build/
+sfml/install/

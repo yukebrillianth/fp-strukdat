@@ -24,14 +24,24 @@ if [ ! -d "sfml/install/lib" ]; then
   echo "-------- SFML Built Successfully --------"
 fi
 
-echo "-------- Compiling Simulasi --------"
+echo "-------- Compiling Collision Simulation --------"
 
+# Compile all source files
 # Explanation of Flags:
-# -I : Look for headers (SFML/Graphics.hpp) in the INSTALL folder
-# -L : Look for library files (libsfml-graphics.dylib) in the INSTALL folder
-# -Wl,-rpath : Tells the resulting executable where to look for .dylib files at RUNTIME
+# -I : Look for headers in the include directory and SFML install folder
+# -L : Look for library files in the SFML install folder
+# -Wl,-rpath : Tells the executable where to look for .dylib files at runtime
+# -lsfml-* : Link against SFML libraries
+# -std=c++17 : Use C++17 standard
 
-clang++ main.cpp -o run \
+clang++ \
+  src/main.cpp \
+  src/core/Particle.cpp \
+  src/algorithms/CollisionDetector.cpp \
+  src/algorithms/BruteForce.cpp \
+  src/algorithms/QuadTree.cpp \
+  -o run \
+  -I"$(pwd)/include" \
   -I"$(pwd)/sfml/install/include" \
   -L"$(pwd)/sfml/install/lib" \
   -Wl,-rpath,"$(pwd)/sfml/install/lib" \
