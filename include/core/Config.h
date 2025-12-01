@@ -16,12 +16,12 @@ namespace Config
 
     // Particle settings
     const unsigned int PARTICLE_COUNT = 30;
-    const float MIN_PARTICLE_RADIUS = 20.0f;
-    const float MAX_PARTICLE_RADIUS = 50.0f;
+    const float MIN_PARTICLE_RADIUS = 10.0f;
+    const float MAX_PARTICLE_RADIUS = 11.0f;
 
     // Physics settings
-    const float MIN_VELOCITY = -3.0f;
-    const float MAX_VELOCITY = 3.0f;
+    const float MIN_VELOCITY = -1.0f;
+    const float MAX_VELOCITY = 1.0f;
     const unsigned int TARGET_FPS = 60;
 }
 

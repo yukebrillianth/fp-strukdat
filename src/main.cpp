@@ -56,25 +56,38 @@ void updateParticlePhysics(Particle &particle)
 
 /**
  * @brief Initialize particles with random properties
+ * @param count Number of particles to create
+ * @param minSize Minimum particle radius
+ * @param maxSize Maximum particle radius
  * @return Vector of initialized particles
  */
-std::vector<Particle> initializeParticles()
+std::vector<Particle> initializeParticles(int count, float minSize, float maxSize)
 {
     std::vector<Particle> particles;
 
-    for (int i = 0; i < Config::PARTICLE_COUNT; ++i)
+    for (int i = 0; i < count; ++i)
     {
-        // Randomize radius between MIN and MAX
-        float r = Config::MIN_PARTICLE_RADIUS + 
-                  static_cast<float>(rand() % static_cast<int>(Config::MAX_PARTICLE_RADIUS - Config::MIN_PARTICLE_RADIUS));
+        // Randomize radius between min and max
+        float r;
+        int sizeRange = static_cast<int>(maxSize - minSize);
+        if (sizeRange > 0) {
+            r = minSize + static_cast<float>(rand() % sizeRange);
+        } else {
+            // Kalo range terlalu kecil, pake minSize aja
+            r = minSize;
+        }
         
         // Randomize position within window bounds
-        float x = r + static_cast<float>(rand() % (Config::WINDOW_WIDTH - static_cast<int>(2 * r)));
-        float y = r + static_cast<float>(rand() % (Config::WINDOW_HEIGHT - static_cast<int>(2 * r)));
+        int xRange = Config::WINDOW_WIDTH - static_cast<int>(2 * r);
+        int yRange = Config::WINDOW_HEIGHT - static_cast<int>(2 * r);
+        
+        float x = r + static_cast<float>(rand() % (xRange > 0 ? xRange : 1));
+        float y = r + static_cast<float>(rand() % (yRange > 0 ? yRange : 1));
         
         // Randomize velocity between MIN and MAX, excluding zero
-        float vx = Config::MIN_VELOCITY + static_cast<float>(rand() % static_cast<int>(Config::MAX_VELOCITY - Config::MIN_VELOCITY + 1));
-        float vy = Config::MIN_VELOCITY + static_cast<float>(rand() % static_cast<int>(Config::MAX_VELOCITY - Config::MIN_VELOCITY + 1));
+        int velRange = static_cast<int>(Config::MAX_VELOCITY - Config::MIN_VELOCITY + 1);
+        float vx = Config::MIN_VELOCITY + static_cast<float>(rand() % (velRange > 0 ? velRange : 1));
+        float vy = Config::MIN_VELOCITY + static_cast<float>(rand() % (velRange > 0 ? velRange : 1));
 
         if (vx == 0) vx = 1;
         if (vy == 0) vy = 1;
@@ -89,22 +102,61 @@ int main(int argc, char *argv[])
 {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-    // Parse command-line arguments buat pilih algo
-    std::string algoName = "brute"; // default
-    if (argc > 1)
-    {
-        std::string arg = argv[1];
-        if (arg == "--algo" && argc > 2)
-        {
-            algoName = argv[2];
-        }
+    // Default values
+    std::string algoName = "brute";
+    int particleCount = Config::PARTICLE_COUNT;
+    float minSize = Config::MIN_PARTICLE_RADIUS;
+    float maxSize = Config::MAX_PARTICLE_RADIUS;
+    bool showFPS = false;
 
-        if (arg == "--help")
+    // Parse command-line arguments
+    for (int i = 1; i < argc; ++i)
+    {
+        std::string arg = argv[i];
+
+        if (arg == "--algo" && i + 1 < argc)
         {
-            std::cout << "Usage: ./run [options]\n";
+            algoName = argv[++i];
+        }
+        else if (arg == "--count" && i + 1 < argc)
+        {
+            particleCount = std::stoi(argv[++i]);
+        }
+        else if (arg == "--size" && i + 1 < argc)
+        {
+            // Format: --size min,max atau --size fixed
+            std::string sizeArg = argv[++i];
+            size_t commaPos = sizeArg.find(',');
+            if (commaPos != std::string::npos)
+            {
+                minSize = std::stof(sizeArg.substr(0, commaPos));
+                maxSize = std::stof(sizeArg.substr(commaPos + 1));
+            }
+            else
+            {
+                // Kalo ga ada koma, berarti fixed size
+                minSize = maxSize = std::stof(sizeArg);
+            }
+        }
+        else if (arg == "--fps")
+        {
+            showFPS = true;
+        }
+        else if (arg == "--help")
+        {
+            std::cout << "Usage: ./run [options]\n\n";
             std::cout << "Options:\n";
-            std::cout << "  --algo [brute|quadtree]  Select collision detection algorithm\n";
-            std::cout << "  --help                  Show this help message\n";
+            std::cout << "  --algo [brute|quadtree]  Select collision detection algorithm (default: brute)\n";
+            std::cout << "  --count N                Number of particles (default: " << Config::PARTICLE_COUNT << ")\n";
+            std::cout << "  --size MIN,MAX           Particle size range (default: " << Config::MIN_PARTICLE_RADIUS 
+                      << "," << Config::MAX_PARTICLE_RADIUS << ")\n";
+            std::cout << "  --size SIZE              Fixed particle size\n";
+            std::cout << "  --fps                    Show FPS counter\n";
+            std::cout << "  --help                   Show this help message\n\n";
+            std::cout << "Examples:\n";
+            std::cout << "  ./run --algo quadtree --count 100 --fps\n";
+            std::cout << "  ./run --count 50 --size 30\n";
+            std::cout << "  ./run --size 10,50 --fps\n";
             return 0;
         }
     }
@@ -113,8 +165,9 @@ int main(int argc, char *argv[])
     sf::ContextSettings settings;
     settings.antiAliasingLevel = 8;
 
-    // Window title tergantung algo yang dipilih
-    std::string windowTitle = "Particle Collision - Algorithm: " + algoName;
+    // Window title dengan info particles dan algo
+    std::string windowTitle = "Collision Sim - " + algoName + " | " + 
+                              std::to_string(particleCount) + " particles";
 
     sf::RenderWindow window(
         sf::VideoMode({Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT}),
@@ -125,8 +178,8 @@ int main(int argc, char *argv[])
 
     window.setFramerateLimit(Config::TARGET_FPS);
 
-    // Initialize particles
-    std::vector<Particle> particles = initializeParticles();
+    // Initialize particles dengan custom parameters
+    std::vector<Particle> particles = initializeParticles(particleCount, minSize, maxSize);
 
     // Select collision detection algorithm berdasarkan argument
     std::unique_ptr<CollisionDetector> detector;
@@ -139,6 +192,11 @@ int main(int argc, char *argv[])
         // Default ke brute force
         detector = std::make_unique<BruteForce>();
     }
+
+    // Setup FPS counter
+    sf::Clock fpsClock;
+    int frameCount = 0;
+    float fps = 0.0f;
 
     // Main game loop
     while (window.isOpen())
@@ -160,6 +218,23 @@ int main(int argc, char *argv[])
 
         // Detect and resolve collisions
         detector->detectAndResolve(particles);
+
+        // Calculate FPS
+        if (showFPS)
+        {
+            frameCount++;
+            if (fpsClock.getElapsedTime().asSeconds() >= 1.0f)
+            {
+                fps = frameCount / fpsClock.restart().asSeconds();
+                frameCount = 0;
+                
+                // Update window title dengan FPS
+                std::string title = "Collision Sim - " + algoName + " | " + 
+                                  std::to_string(particleCount) + " particles | FPS: " + 
+                                  std::to_string(static_cast<int>(fps));
+                window.setTitle(title);
+            }
+        }
 
         // Render
         window.clear(sf::Color::Black);

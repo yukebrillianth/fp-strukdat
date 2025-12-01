@@ -66,18 +66,39 @@ fp/
 
 ## Algorithm Selection
 
-You can choose which algorithm to use with command-line arguments:
+You can customize the simulation with command-line arguments:
 
 ```bash
-# Run with brute-force (default)
-./run
-./run --algo brute
+# Basic usage
+./run                                    # Default: brute-force, 30 particles
+./run --algo brute                       # Explicit brute-force
+./run --algo quadtree                    # Use QuadTree
 
-# Run with QuadTree
-./run --algo quadtree
+# Custom particle count
+./run --count 100                        # 100 particles
+./run --algo quadtree --count 200        # QuadTree with 200 particles
+
+# Custom particle size
+./run --size 25                          # Fixed size (radius 25)
+./run --size 10,50                       # Random size range (10-50)
+
+# Show FPS counter
+./run --fps                              # Display FPS in window title
+./run --algo quadtree --count 150 --fps  # All together
+
+# Combinations
+./run --algo quadtree --count 100 --size 15,35 --fps
+./run --count 50 --size 40
 ```
 
-The algorithm name will be displayed in the window title.
+**Available Options:**
+
+- `--algo [brute|quadtree]` - Select collision detection algorithm
+- `--count N` - Number of particles (default: 30)
+- `--size SIZE` - Fixed particle radius
+- `--size MIN,MAX` - Random particle radius range (default: 20,50)
+- `--fps` - Show FPS counter in window title
+- `--help` - Show help message
 
 ## Dependencies
 
